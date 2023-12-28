@@ -1,0 +1,82 @@
+.drawer {
+    position: fixed;
+    width: 40%;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    z-index: 1000;
+}
+.drawer-content {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.close-button {
+    margin-top: auto;
+}
+.drawer.left {
+    left: 0;
+    top: 0;
+}
+
+.drawer.right {
+    right: 0;
+    top: 0;
+}
+
+.drawer.top {
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 40%;
+}
+
+.drawer.bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 40%;
+}
+
+.drawer.left.open {
+    transform: translateX(0);
+}
+
+.drawer.left.closed {
+    transform: translateX(-100%);
+    pointer-events: none;
+}
+
+.drawer.right.open {
+    transform: translateX(0);
+}
+
+.drawer.right.closed {
+    transform: translateX(100%);
+    pointer-events: none;
+}
+
+.drawer.top.open {
+    transform: translateY(0);
+}
+
+.drawer.top.closed {
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+
+.drawer.bottom.open {
+    transform: translateY(0);
+}
+
+.drawer.bottom.closed {
+    transform: translateY(100%);
+    pointer-events: none;
+}
