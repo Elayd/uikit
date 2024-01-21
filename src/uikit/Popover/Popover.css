@@ -1,0 +1,32 @@
+.popover-wrapper {
+    position: relative;
+    border: none;
+    background: none;
+    outline: none;
+}
+
+.popover-content {
+    position: absolute;
+    background-color: gray;
+    border: 2px solid black;
+    width: 200px;
+    height: 200px;
+}
+
+.popover-content-topRight {
+    bottom: 100%;
+    left: 0;
+}
+.popover-content-topLeft {
+    right: 0;
+    bottom: 100%;
+}
+.popover-content-bottomLeft {
+    top: 100%;
+    right: 0;
+}
+
+.popover-content.bottomRight {
+    top: 100%;
+    left: 0;
+}

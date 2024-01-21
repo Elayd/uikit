@@ -1,0 +1,36 @@
+.tooltip {
+    align-items: center;
+    background-color: black;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+    position: absolute;
+    white-space: normal;
+    z-index: 100;
+}
+
+.tooltip-content {
+    color: white;
+    font-size: 16px;
+}
+
+.tooltip.tooltip-right {
+    transform: translateX(100%);
+}
+
+.tooltip.tooltip-top {
+    transform: translateY(-100%);
+}
+.tooltip.tooltip-bottom {
+    transform: translateY(100%);
+}
+.tooltip.tooltip-left {
+    transform: translateX(-100%);
+}
+.tooltip-wrapper {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
