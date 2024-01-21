@@ -1,0 +1,47 @@
+.dropdown-wrapper {
+    color: black;
+    position: relative;
+    border: 1px solid gray;
+}
+.dropdown-content-links {
+    color: white;
+}
+.dropdown-wrapper:hover {
+}
+.dropdown-content {
+    position: absolute;
+    background-color: black;
+}
+
+.dropdown-content-topLeft {
+    right: 0;
+    bottom: 100%;
+}
+
+.dropdown-content-topRight {
+    bottom: 100%;
+    left: 0;
+}
+.dropdown-content-bottomLeft {
+    top: 100%;
+    right: 0;
+}
+.dropdown-content-bottomRight {
+    top: 100%;
+    left: 0;
+}
+
+.dropdown-item {
+    padding: 10px 25px;
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    color: white;
+    cursor: pointer;
+}
+
+.dropdown-item-active {
+    opacity: 0.5;
+    background-color: gray;
+}
