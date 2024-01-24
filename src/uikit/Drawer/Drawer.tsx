@@ -1,48 +1,24 @@
-import {Fragment, memo, ReactNode, useCallback, useEffect, useRef} from "react";
-import { createPortal } from "react-dom";
-import './styles.css'
-import {Transition} from "@headlessui/react";
-//
+import { Fragment, memo, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import './styles.css';
+import { Transition } from '@headlessui/react';
+
 interface DrawerProps {
     children: ReactNode;
     isOpen?: boolean;
     onClose: () => void;
-    position?: "left" | "right" | "top" | "bottom" | 'center';
+    position?: 'left' | 'right' | 'top' | 'bottom' | 'center';
 }
-//
-// export const Drawer = memo((props: DrawerProps) => {
-//     const { children, onClose, isOpen, position = "right" } = props;
-//
-//     const modalRef = useRef<HTMLDivElement | null>(null);
-//
-//
-//
-//     return createPortal(
-//
-//         <div className='drawer'>
-//             <div className="drawer-content" ref={modalRef}>
-//                 {children}
-//                 <button onClick={close} className="close-button">
-//                     Close
-//                 </button>
-//             </div>
-//         </div>,
-//         document.body
-//     );
-// });
-
-
-
 
 export const Drawer = memo((props: DrawerProps) => {
-    const { children, onClose, isOpen, position = "right" } = props;
+    const { children, onClose, isOpen, position = 'right' } = props;
 
     const modalRef = useRef<HTMLDivElement | null>(null);
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                onClose()
+                onClose();
             }
         },
         [onClose]
@@ -69,12 +45,10 @@ export const Drawer = memo((props: DrawerProps) => {
         };
     }, [isOpen, onKeyDown, handleOutsideClick]);
 
-    const direction = `drawer ${position}`
+    const direction = `drawer ${position}`;
 
     return createPortal(
-
         <div>
-
             {position !== 'center' && (
                 <Transition
                     show={isOpen}
@@ -86,14 +60,14 @@ export const Drawer = memo((props: DrawerProps) => {
                     leaveTo="opacity-0"
                     as={Fragment}
                 >
-                <div className={direction}>
-                    <div className="drawer-content" ref={modalRef}>
-                        {children}
-                        <button onClick={onClose} className="close-button">
-                            Close
-                        </button>
+                    <div className={direction}>
+                        <div className="drawer-content" ref={modalRef}>
+                            {children}
+                            <button onClick={onClose} className="close-button">
+                                Close
+                            </button>
+                        </div>
                     </div>
-                </div>
                 </Transition>
             )}
 
@@ -108,12 +82,10 @@ export const Drawer = memo((props: DrawerProps) => {
                     leaveTo="opacity-0"
                     as={Fragment}
                 >
-                    <div className='modal'>
+                    <div className="modal">
                         <div ref={modalRef} className="modal-content">
                             {children}
-                            <button onClick={onClose}>
-                                Close
-                            </button>
+                            <button onClick={onClose}>Close</button>
                         </div>
                     </div>
                 </Transition>
@@ -122,4 +94,3 @@ export const Drawer = memo((props: DrawerProps) => {
         document.body
     );
 });
-
