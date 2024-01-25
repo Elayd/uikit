@@ -1,72 +1,46 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import './Dropdown.css';
+import { MouseEventHandler, ReactElement, ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 
-type Items = {
-    id: number;
-    value: string;
-};
-
 interface DropdownProps {
-    items: Items[];
-    position?: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
-    title: string;
-    href?: string;
+    position?: 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
+    renderView: (handlers: { selectedValue: string; onClick: MouseEventHandler<HTMLDivElement> }) => ReactElement;
+    children?: ReactElement;
+}
+interface DropdownItemProps {
+    value?: string;
+    children?: ReactElement;
 }
 
-const Dropdown = memo((props: DropdownProps) => {
+const Dropdown = (props: DropdownProps) => {
+    const { renderView, children } = props;
+    const [value, setValue] = useState('');
     const [isVisible, setIsVisible] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<number | null>(null);
 
-    const { position, items, title } = props;
-    const menuRef = useRef<HTMLDivElement | null>(null);
+    console.log(isVisible);
 
-    const handleOutsideClick = useCallback(
-        (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setIsVisible(false);
-            }
-        },
-        [setIsVisible]
-    );
-
-    const handleItemClick = (itemId: number) => {
-        setSelectedItem(itemId);
-        setIsVisible(false);
+    const handleClick = () => {
+        setIsVisible(true);
     };
-
-    useEffect(() => {
-        if (isVisible) {
-            document.addEventListener('mousedown', handleOutsideClick);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, [isVisible, handleOutsideClick]);
-
     return (
-        <div className="dropdown-wrapper" ref={menuRef} onClick={() => setIsVisible(!isVisible)}>
-            {title}
-            {isVisible && (
-                <div className={classNames('dropdown-content', `dropdown-content-${position}`)}>
-                    <div className="dropdown-content-links">
-                        {items.map((item) => (
-                            <button
-                                key={item.id}
-                                className={classNames('dropdown-item', { 'dropdown-item-active': selectedItem === item.id })}
-                                onMouseEnter={() => setSelectedItem(item.id)}
-                                onMouseLeave={() => setSelectedItem(null)}
-                                onClick={() => handleItemClick(item.id)}
-                            >
-                                {item.value}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
+        <>
+            {renderView({
+                onClick: handleClick,
+                selectedValue: value
+            })}
+            {
+                isVisible && (
+                    // createPortal(
+                    <div className={classNames('tooltip-content')}>{children}</div>
+                )
+                // document.body
+            }
+        </>
     );
-});
+};
+
+Dropdown.Item = ({ value, children }: DropdownItemProps) => {
+    return <div className="dropdown-item">{children}</div>;
+};
 
 export default Dropdown;

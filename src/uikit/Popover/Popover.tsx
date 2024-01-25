@@ -1,42 +1,52 @@
-import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { CSSProperties, FC, memo, MouseEventHandler, ReactElement, ReactNode, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import './Popover.css';
+import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
+import { calculatePositionStyle } from '../../utils/calculatePositionStyle.tsx';
 
 interface PopoverProps {
-    children: ReactElement;
-    position?: 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
-    title: string;
+    content?: ReactNode;
+    position: 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
+    children: (handlers: { onClick: MouseEventHandler<HTMLButtonElement> }) => ReactElement;
 }
-const Popover = (props: PopoverProps) => {
-    const { position, children, title } = props;
+
+export const Popover: FC<PopoverProps> = memo(({ content, position, children }) => {
     const [isVisible, setIsVisible] = useState(false);
-    const popoverRef = useRef<HTMLDivElement | null>(null);
+    const [positionStyle, setPositionStyle] = useState<CSSProperties>({});
+    const [triggerRect, setTriggerRect] = useState<DOMRect>();
+    const contentRef = useRef<HTMLDivElement>(null);
 
-    const handleOutsideClick = useCallback(
-        (e: MouseEvent) => {
-            if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-                setIsVisible(false);
-            }
-        },
-        [setIsVisible]
-    );
+    useOutsideClick('.popover-content', () => {
+        setIsVisible(false);
+    });
 
-    useEffect(() => {
-        if (isVisible) {
-            document.addEventListener('mousedown', handleOutsideClick);
+    const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        setTriggerRect(rect);
+        setIsVisible(true);
+    };
+
+    useLayoutEffect(() => {
+        if (isVisible && contentRef.current && triggerRect) {
+            const contentRect = contentRef.current.getBoundingClientRect();
+            const positionStyle = calculatePositionStyle(position, triggerRect, contentRect);
+            setPositionStyle(positionStyle);
         }
-
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, [isVisible, handleOutsideClick]);
+    }, [isVisible, position, triggerRect]);
 
     return (
-        <div ref={popoverRef} className="popover-wrapper">
-            <button onClick={() => setIsVisible(true)}>{title}</button>
-            {isVisible && <div className={classNames('popover-content', `popover-content-${position}`)}>{children}</div>}
-        </div>
+        <>
+            {children({
+                onClick: handleClick
+            })}
+            {isVisible &&
+                createPortal(
+                    <div ref={contentRef} className={classNames('popover-content', `popover-${position}`)} style={{ ...positionStyle }}>
+                        {content}
+                    </div>,
+                    document.body
+                )}
+        </>
     );
-};
-
-export default Popover;
+});
