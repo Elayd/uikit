@@ -20,7 +20,6 @@ const Dropdown = (props: DropdownProps) => {
     console.log(isVisible);
 
     const handleClick = () => {
-        console.log('asda');
         setIsVisible(true);
     };
     return (
