@@ -5,12 +5,16 @@ import { Popover } from './uikit/Popover/Popover.tsx';
 import Dropdown from './uikit/Dropdown/Dropdown.tsx';
 import Modal from './uikit/Modal/Modal.tsx';
 import { useState } from 'react';
-import { Drawer } from './uikit/Drawer/Drawer.tsx';
 
 const App = () => {
     const [isOpen, setIsOpen] = useState(false);
     const handleClose = () => {
         setIsOpen(false);
+    };
+    const [value, setValue] = useState<string>('test');
+
+    const handleChange = (selected: string) => {
+        setValue(selected);
     };
 
     return (
@@ -22,32 +26,21 @@ const App = () => {
             </Modal>
 
             <Dropdown
+                position="topLeft"
+                onChange={handleChange}
+                value={value}
                 renderView={({ selectedValue, onClick }) => (
-                    <p>
+                    <div style={{ border: '2px black solid' }} onClick={onClick}>
                         {selectedValue}
-                        <div onClick={onClick} className="small-text">
-                            Hello world!
-                        </div>
-                    </p>
+                    </div>
                 )}
             >
-                <>
-                    <Dropdown.Item>
-                        <div>hello</div>
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        <div>hello</div>
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        <div>hello</div>
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        <div>hello</div>
-                    </Dropdown.Item>
-                    <Dropdown.Item>
-                        <div>hello</div>
-                    </Dropdown.Item>
-                </>
+                <Dropdown.Item value="hello">
+                    <div>hello</div>
+                </Dropdown.Item>
+                <Dropdown.Item value="bye">
+                    <div>bye</div>
+                </Dropdown.Item>
             </Dropdown>
             <Tooltip content={<div>Left</div>} position="left">
                 {({ onMouseEnter, onMouseLeave }) => (

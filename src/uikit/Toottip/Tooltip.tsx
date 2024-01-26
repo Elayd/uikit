@@ -14,28 +14,26 @@ interface TooltipProps {
 }
 
 export const Tooltip: FC<TooltipProps> = memo(({ content, position, children }) => {
-    const [isVisible, setIsVisible] = useState(false);
-
     const [positionStyle, setPositionStyle] = useState<CSSProperties>({});
-    const [triggerRect, setTriggerRect] = useState<DOMRect>();
+    const [triggerRect, setTriggerRect] = useState<HTMLDivElement | null>();
     const contentRef = useRef<HTMLDivElement>(null);
     const handleMouseEnter: MouseEventHandler<HTMLDivElement> = (event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
+        const rect = event.currentTarget;
         setTriggerRect(rect);
-        setIsVisible(true);
     };
 
     const handleMouseLeave: MouseEventHandler<HTMLDivElement> = () => {
-        setIsVisible(false);
+        setTriggerRect(null);
     };
 
     useLayoutEffect(() => {
-        if (isVisible && contentRef.current && triggerRect) {
+        if (contentRef.current && triggerRect) {
             const contentRect = contentRef.current.getBoundingClientRect();
-            const positionStyle = calculatePositionStyle(position, triggerRect, contentRect);
+            const clickedRect = triggerRect.getBoundingClientRect();
+            const positionStyle = calculatePositionStyle(position, clickedRect, contentRect);
             setPositionStyle(positionStyle);
         }
-    }, [isVisible, position, triggerRect]);
+    }, [position, triggerRect]);
 
     return (
         <>
@@ -43,7 +41,7 @@ export const Tooltip: FC<TooltipProps> = memo(({ content, position, children }) 
                 onMouseEnter: handleMouseEnter,
                 onMouseLeave: handleMouseLeave
             })}
-            {isVisible &&
+            {triggerRect &&
                 createPortal(
                     <div ref={contentRef} className={classNames('tooltip-content', `tooltip-${position}`)} style={{ ...positionStyle }}>
                         {content}
