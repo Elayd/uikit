@@ -12,35 +12,34 @@ interface PopoverProps {
 }
 
 export const Popover: FC<PopoverProps> = memo(({ content, position, children }) => {
-    const [isVisible, setIsVisible] = useState(false);
     const [positionStyle, setPositionStyle] = useState<CSSProperties>({});
-    const [triggerRect, setTriggerRect] = useState<DOMRect>();
+    const [triggerRect, setTriggerRect] = useState<HTMLButtonElement | null>();
     const contentRef = useRef<HTMLDivElement>(null);
 
     useOutsideClick('.popover-content', () => {
-        setIsVisible(false);
+        setTriggerRect(null);
     });
 
     const handleClick: MouseEventHandler<HTMLButtonElement> = (event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
+        const rect = event.currentTarget;
         setTriggerRect(rect);
-        setIsVisible(true);
     };
 
     useLayoutEffect(() => {
-        if (isVisible && contentRef.current && triggerRect) {
+        if (contentRef.current && triggerRect) {
             const contentRect = contentRef.current.getBoundingClientRect();
-            const positionStyle = calculatePositionStyle(position, triggerRect, contentRect);
+            const clickedRect = triggerRect.getBoundingClientRect();
+            const positionStyle = calculatePositionStyle(position, clickedRect, contentRect);
             setPositionStyle(positionStyle);
         }
-    }, [isVisible, position, triggerRect]);
+    }, [position, triggerRect]);
 
     return (
         <>
             {children({
                 onClick: handleClick
             })}
-            {isVisible &&
+            {triggerRect &&
                 createPortal(
                     <div ref={contentRef} className={classNames('popover-content', `popover-${position}`)} style={{ ...positionStyle }}>
                         {content}
