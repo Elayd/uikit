@@ -1,4 +1,4 @@
-import { Fragment, memo, ReactNode, useCallback, useEffect, useRef } from 'react';
+import { Fragment, memo, ReactNode, useCallback, useEffect, useRef, MutableRefObject } from 'react';
 import { createPortal } from 'react-dom';
 import './styles.css';
 import { Transition } from '@headlessui/react';
@@ -10,23 +10,26 @@ interface DrawerProps {
     position?: 'left' | 'right' | 'top' | 'bottom';
 }
 
+const drawerStack: MutableRefObject<HTMLDivElement | null>[] = [];
+
 export const Drawer = memo((props: DrawerProps) => {
     const { children, onClose, isOpen, position = 'right' } = props;
 
     const DrawerRef = useRef<HTMLDivElement | null>(null);
-
-    const onKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose();
+    const handleOutsideClick = useCallback(
+        (e: MouseEvent) => {
+            if (DrawerRef.current && !DrawerRef.current.contains(e.target as Node)) {
+                if (drawerStack.length > 0 && DrawerRef.current === drawerStack[drawerStack.length - 1].current) {
+                    onClose();
+                }
             }
         },
         [onClose]
     );
 
-    const handleOutsideClick = useCallback(
-        (e: MouseEvent) => {
-            if (DrawerRef.current && !DrawerRef.current.contains(e.target as Node)) {
+    const onKeyDown = useCallback(
+        (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && DrawerRef.current === drawerStack[drawerStack.length - 1].current) {
                 onClose();
             }
         },
@@ -35,6 +38,7 @@ export const Drawer = memo((props: DrawerProps) => {
 
     useEffect(() => {
         if (isOpen) {
+            drawerStack.push(DrawerRef);
             window.addEventListener('keydown', onKeyDown);
             document.addEventListener('mousedown', handleOutsideClick);
         }
@@ -42,6 +46,7 @@ export const Drawer = memo((props: DrawerProps) => {
         return () => {
             window.removeEventListener('keydown', onKeyDown);
             document.removeEventListener('mousedown', handleOutsideClick);
+            drawerStack.pop();
         };
     }, [isOpen, onKeyDown, handleOutsideClick]);
 

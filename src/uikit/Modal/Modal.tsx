@@ -1,33 +1,40 @@
 import { Transition } from '@headlessui/react';
-import { Fragment, ReactNode, MouseEvent, useEffect } from 'react';
+import { Fragment, ReactNode, MouseEvent, useEffect, useRef, MutableRefObject } from 'react';
 import { createPortal } from 'react-dom';
 import './Modal.css';
+
 interface ModalProps {
     children: ReactNode;
     isOpen?: boolean;
     onClose: () => void;
 }
+
+const modalStack: MutableRefObject<HTMLDivElement | null>[] = [];
+
 const Modal = (props: ModalProps) => {
     const { children, isOpen = false, onClose } = props;
+    const modalRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && modalRef.current === modalStack[modalStack.length - 1].current) {
                 onClose();
             }
         };
 
         if (isOpen) {
+            modalStack.push(modalRef);
             window.addEventListener('keydown', onKeyDown);
         }
 
         return () => {
             window.removeEventListener('keydown', onKeyDown);
+            modalStack.pop();
         };
     }, [isOpen, onClose]);
 
     const handleCloseOverlay = (e: MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
+        if (e.target === modalRef.current) {
             onClose();
         }
     };
@@ -43,7 +50,7 @@ const Modal = (props: ModalProps) => {
             leaveTo="opacity-0"
             as={Fragment}
         >
-            <div className="modal" onClick={handleCloseOverlay}>
+            <div className="modal" onClick={handleCloseOverlay} ref={modalRef}>
                 <div className="modal-content">
                     {children}
                     <button onClick={onClose}>Close</button>

@@ -56,8 +56,6 @@ const Dropdown = (props: DropdownProps) => {
         if (contentRef.current && triggerRect) {
             const contentRect = contentRef.current.getBoundingClientRect();
             const clickedRect = triggerRect.getBoundingClientRect();
-            console.log(clickedRect, 'clicked');
-            console.log(contentRect, 'content');
             const positionStyle = calculatePositionStyle(position, clickedRect, contentRect);
             setPositionStyle(positionStyle);
         }
