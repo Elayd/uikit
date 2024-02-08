@@ -1,4 +1,4 @@
-type PositionProps = 'left' | 'right' | 'bottom' | 'top' | 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
+type PositionProps = 'left' | 'right' | 'bottom' | 'top' | 'autoComplete' | 'topRight' | 'topLeft' | 'bottomRight' | 'bottomLeft';
 export const calculatePositionStyle = (position: PositionProps, rect: DOMRect, contentRect: DOMRect) => {
     switch (position) {
         case 'top':
@@ -40,6 +40,11 @@ export const calculatePositionStyle = (position: PositionProps, rect: DOMRect, c
             return {
                 top: rect.bottom,
                 left: rect.left - contentRect.width
+            };
+        case 'autoComplete':
+            return {
+                top: rect.bottom,
+                left: rect.left
             };
         default:
             return {};
