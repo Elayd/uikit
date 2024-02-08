@@ -1,7 +1,9 @@
 import { Transition } from '@headlessui/react';
-import { Fragment, ReactNode, MouseEvent, useEffect, useRef, MutableRefObject } from 'react';
+import { Fragment, ReactNode, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import './Modal.css';
+import { useLatest } from '../../hooks/useLatest.ts';
+import { LayerManager } from '../../utils/LayerManager.ts';
 
 interface ModalProps {
     children: ReactNode;
@@ -9,35 +11,18 @@ interface ModalProps {
     onClose: () => void;
 }
 
-const modalStack: MutableRefObject<HTMLDivElement | null>[] = [];
+const layerManager = new LayerManager();
 
 const Modal = (props: ModalProps) => {
     const { children, isOpen = false, onClose } = props;
     const modalRef = useRef<HTMLDivElement | null>(null);
+    const latestOnClose = useLatest(onClose);
 
     useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && modalRef.current === modalStack[modalStack.length - 1].current) {
-                onClose();
-            }
-        };
-
         if (isOpen) {
-            modalStack.push(modalRef);
-            window.addEventListener('keydown', onKeyDown);
+            layerManager.addLayer(latestOnClose.current);
         }
-
-        return () => {
-            window.removeEventListener('keydown', onKeyDown);
-            modalStack.pop();
-        };
-    }, [isOpen, onClose]);
-
-    const handleCloseOverlay = (e: MouseEvent<HTMLDivElement>) => {
-        if (e.target === modalRef.current) {
-            onClose();
-        }
-    };
+    }, [isOpen]);
 
     return createPortal(
         <Transition
@@ -50,10 +35,12 @@ const Modal = (props: ModalProps) => {
             leaveTo="opacity-0"
             as={Fragment}
         >
-            <div className="modal" onClick={handleCloseOverlay} ref={modalRef}>
-                <div className="modal-content">
-                    {children}
-                    <button onClick={onClose}>Close</button>
+            <div className="modal" ref={modalRef}>
+                <div className="modal-overlay" onClick={latestOnClose.current}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        {children}
+                        <button onClick={latestOnClose.current}>Close</button>
+                    </div>
                 </div>
             </div>
         </Transition>,

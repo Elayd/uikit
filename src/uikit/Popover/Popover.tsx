@@ -16,7 +16,7 @@ export const Popover: FC<PopoverProps> = memo(({ content, position, children }) 
     const [triggerRect, setTriggerRect] = useState<HTMLButtonElement | null>();
     const contentRef = useRef<HTMLDivElement>(null);
 
-    useOutsideClick('.popover-content', () => {
+    useOutsideClick(contentRef, () => {
         setTriggerRect(null);
     });
 

@@ -1,7 +1,10 @@
-import { Fragment, memo, ReactNode, useCallback, useEffect, useRef, MutableRefObject } from 'react';
+import { Fragment, memo, ReactNode, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import './styles.css';
 import { Transition } from '@headlessui/react';
+import { useLatest } from '../../hooks/useLatest.ts';
+import { LayerManager } from '../../utils/LayerManager.ts';
+import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
 
 interface DrawerProps {
     children: ReactNode;
@@ -10,45 +13,24 @@ interface DrawerProps {
     position?: 'left' | 'right' | 'top' | 'bottom';
 }
 
-const drawerStack: MutableRefObject<HTMLDivElement | null>[] = [];
+const layerManager = new LayerManager();
 
 export const Drawer = memo((props: DrawerProps) => {
     const { children, onClose, isOpen, position = 'right' } = props;
 
-    const DrawerRef = useRef<HTMLDivElement | null>(null);
-    const handleOutsideClick = useCallback(
-        (e: MouseEvent) => {
-            if (DrawerRef.current && !DrawerRef.current.contains(e.target as Node)) {
-                if (drawerStack.length > 0 && DrawerRef.current === drawerStack[drawerStack.length - 1].current) {
-                    onClose();
-                }
-            }
-        },
-        [onClose]
-    );
+    const latestOnClose = useLatest(onClose);
 
-    const onKeyDown = useCallback(
-        (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && DrawerRef.current === drawerStack[drawerStack.length - 1].current) {
-                onClose();
-            }
-        },
-        [onClose]
-    );
+    const DrawerRef = useRef<HTMLDivElement | null>(null);
+
+    useOutsideClick(DrawerRef, () => {
+        latestOnClose.current();
+    });
 
     useEffect(() => {
         if (isOpen) {
-            drawerStack.push(DrawerRef);
-            window.addEventListener('keydown', onKeyDown);
-            document.addEventListener('mousedown', handleOutsideClick);
+            layerManager.addLayer(latestOnClose.current);
         }
-
-        return () => {
-            window.removeEventListener('keydown', onKeyDown);
-            document.removeEventListener('mousedown', handleOutsideClick);
-            drawerStack.pop();
-        };
-    }, [isOpen, onKeyDown, handleOutsideClick]);
+    }, [isOpen]);
 
     return createPortal(
         <div>
@@ -65,7 +47,7 @@ export const Drawer = memo((props: DrawerProps) => {
                 <div className={`drawer ${position}`}>
                     <div className="drawer-content" ref={DrawerRef}>
                         {children}
-                        <button onClick={onClose} className="close-button">
+                        <button onClick={latestOnClose.current} className="close-button">
                             Close
                         </button>
                     </div>

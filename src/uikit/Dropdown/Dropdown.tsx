@@ -43,7 +43,7 @@ const Dropdown = (props: DropdownProps) => {
     const [positionStyle, setPositionStyle] = useState<CSSProperties>({});
     const [triggerRect, setTriggerRect] = useState<HTMLDivElement | null>();
 
-    useOutsideClick('.dropdown-content', () => {
+    useOutsideClick(contentRef, () => {
         setTriggerRect(null);
     });
 
