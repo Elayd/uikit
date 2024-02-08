@@ -1,15 +1,4 @@
-import {
-    MouseEventHandler,
-    ReactElement,
-    useState,
-    createContext,
-    useContext,
-    Dispatch,
-    SetStateAction,
-    useLayoutEffect,
-    useRef,
-    CSSProperties
-} from 'react';
+import { MouseEventHandler, ReactElement, useState, createContext, useContext, useLayoutEffect, useRef, CSSProperties } from 'react';
 import './Dropdown.css';
 import classNames from 'classnames';
 import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
@@ -30,8 +19,7 @@ interface DropdownItemProps {
 }
 
 interface DropdownContextProps {
-    onChange?: (value: string) => void;
-    onSelect?: Dispatch<SetStateAction<HTMLDivElement | null | undefined>>;
+    onSelect?: (value: string) => void;
     valueContext: string;
 }
 
@@ -61,8 +49,13 @@ const Dropdown = (props: DropdownProps) => {
         }
     }, [position, triggerRect]);
 
+    const onSelect = (value: string): void => {
+        onChange(value);
+        setTriggerRect(null);
+    };
+
     return (
-        <DropdownContext.Provider value={{ valueContext: value, onChange, onSelect: setTriggerRect }}>
+        <DropdownContext.Provider value={{ valueContext: value, onSelect }}>
             <>
                 {renderView({
                     onClick: handleClick,
@@ -81,15 +74,14 @@ const Dropdown = (props: DropdownProps) => {
 };
 
 Dropdown.Item = ({ children, value }: DropdownItemProps) => {
-    const { onChange, valueContext, onSelect } = useContext(DropdownContext);
+    const { valueContext, onSelect } = useContext(DropdownContext);
 
     const isActiveClass = value === valueContext;
     const activeClassSelector = isActiveClass ? 'dropdown-active' : '';
 
     const handleClick = () => {
-        if (onChange && onSelect) {
-            onChange(value);
-            onSelect(null);
+        if (onSelect) {
+            onSelect(value);
         }
     };
 
