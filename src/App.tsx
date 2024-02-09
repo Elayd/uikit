@@ -5,6 +5,7 @@ import Dropdown from './uikit/Dropdown/Dropdown.tsx';
 import Modal from './uikit/Modal/Modal.tsx';
 import { useState } from 'react';
 import { Drawer } from './uikit/Drawer/Drawer.tsx';
+import Autocomplete from './uikit/AutoComplete/Autocomplete.tsx';
 
 const App = () => {
     const [value, setValue] = useState<string>('test');
@@ -20,12 +21,22 @@ const App = () => {
     const [firstDrawerOpen, setFirstDrawerOpen] = useState(false);
     const [secondDrawerOpen, setSecondDrawerOpen] = useState(false);
 
+    const fetchData = (query: string): Promise<string[]> => {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const data = ['Apple', 'Banana', 'Orange', 'Pineapple', 'Mango'];
+                resolve(data.filter((item) => item.toLowerCase().includes(query.toLowerCase())));
+            }, 500);
+        });
+    };
+
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 100, gap: 20 }}>
             <>
                 <button onClick={() => setFirstModalOpen(true)}>Open First Modal</button>
 
                 <button onClick={() => setFirstDrawerOpen(true)}>Open First Drawer</button>
+                <Autocomplete asyncGetData={fetchData} />
 
                 <Modal isOpen={firstModalOpen} onClose={() => setFirstModalOpen(false)}>
                     <p>Content of the First Modal</p>
