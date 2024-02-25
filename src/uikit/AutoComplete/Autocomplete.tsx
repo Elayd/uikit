@@ -1,51 +1,35 @@
-import { ChangeEvent, CSSProperties, FC, memo, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useDebounce } from '../../hooks/useDebounce.tsx';
-import './Autocomplete.css';
-import { useLatest } from '../../hooks/useLatest.ts';
+import React, { CSSProperties, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
 import { calculatePositionStyle } from '../../utils/calculatePositionStyle.tsx';
+import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
+import './Autocomplete.css';
 
-interface AutoCompleteProps {
-    asyncGetData: (query: string) => Promise<string[]>;
+interface AutocompleteProps {
+    onChange: (value: string) => void;
+    value: string;
+    options: string[];
+    renderOptions: (options: string[], onItemClick: (value: string) => void) => React.ReactElement;
 }
 
-const AutoComplete: FC<AutoCompleteProps> = memo(({ asyncGetData }) => {
-    const latestAsyncFunc = useLatest(asyncGetData);
-    const [inputValue, setInputValue] = useState<string>('');
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [isItemSelected, setIsItemSelected] = useState<boolean>(false);
-    const contentRef = useRef<HTMLUListElement>(null);
-    const [triggerRect, setTriggerRect] = useState<HTMLInputElement | null>();
+const Autocomplete: React.FC<AutocompleteProps> = ({ onChange, value, options, renderOptions }) => {
+    const [filteredOptions, setFilteredOptions] = useState<string[]>([]);
+    const handleInputChange = (value: string) => {
+        const filtered = options.filter((option) => option.toLowerCase().includes(value.toLowerCase()));
+        setFilteredOptions(filtered);
+        onChange(value);
+    };
+    const contentRef = useRef<HTMLInputElement>(null);
     const [positionStyle, setPositionStyle] = useState<CSSProperties>({});
-
-    const debouncedInputValue = useDebounce<string>(inputValue, 300);
-
-    useEffect(() => {
-        if (debouncedInputValue && !isItemSelected) {
-            latestAsyncFunc.current(debouncedInputValue).then((data) => {
-                setSuggestions(data);
-            });
-        }
-    }, [debouncedInputValue, latestAsyncFunc, isItemSelected]);
+    const [triggerRect, setTriggerRect] = useState<HTMLDivElement | null>();
 
     useOutsideClick(contentRef, () => {
         setTriggerRect(null);
     });
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setInputValue(event.target.value);
-        setIsItemSelected(false);
-    };
 
-    const handleItemClick = (item: string) => {
-        setInputValue(item);
-        setSuggestions([]);
-        setIsItemSelected(true);
-    };
-
-    const handleClick: MouseEventHandler<HTMLInputElement> = (event) => {
-        const rect = event.currentTarget;
-        setTriggerRect(rect);
+    const handleItemClick = (value: string) => {
+        onChange(value);
+        setFilteredOptions([]);
+        setTriggerRect(null);
     };
 
     useLayoutEffect(() => {
@@ -56,29 +40,27 @@ const AutoComplete: FC<AutoCompleteProps> = memo(({ asyncGetData }) => {
             setPositionStyle(positionStyle);
         }
     }, [triggerRect]);
+
     return (
-        <div className="autocomplete-container">
+        <div>
             <input
+                ref={contentRef}
                 type="text"
-                onClick={handleClick}
-                value={inputValue}
-                onChange={handleChange}
-                placeholder="Type something..."
-                className="autocomplete-input"
+                value={value}
+                onClick={(event) => setTriggerRect(event.currentTarget)}
+                onChange={(e) => handleInputChange(e.target.value)}
             />
+
             {triggerRect &&
+                filteredOptions.length > 0 &&
                 createPortal(
-                    <ul ref={contentRef} className="autocomplete-suggestions" style={{ ...positionStyle }}>
-                        {suggestions.map((item, index) => (
-                            <li key={index} onClick={() => handleItemClick(item)}>
-                                {item}
-                            </li>
-                        ))}
-                    </ul>,
+                    <div ref={contentRef} className="autocomplete-suggestions" style={{ ...positionStyle }}>
+                        {renderOptions(filteredOptions, handleItemClick)}
+                    </div>,
                     document.body
                 )}
         </div>
     );
-});
+};
 
-export default AutoComplete;
+export default Autocomplete;

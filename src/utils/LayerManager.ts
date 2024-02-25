@@ -21,6 +21,9 @@ export class LayerManager {
 
     addLayer(close: () => void) {
         this.layers.push({ close });
+        // return () => {
+        //     this.closeLayer();
+        // };
     }
 
     closeLayer() {
@@ -28,3 +31,5 @@ export class LayerManager {
         latestLayer?.close();
     }
 }
+
+export const layerManager = new LayerManager();

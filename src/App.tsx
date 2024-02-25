@@ -21,22 +21,35 @@ const App = () => {
     const [firstDrawerOpen, setFirstDrawerOpen] = useState(false);
     const [secondDrawerOpen, setSecondDrawerOpen] = useState(false);
 
-    const fetchData = (query: string): Promise<string[]> => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const data = ['Apple', 'Banana', 'Orange', 'Pineapple', 'Mango'];
-                resolve(data.filter((item) => item.toLowerCase().includes(query.toLowerCase())));
-            }, 500);
-        });
+    const options = ['Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 'Kiwi', 'Lemon'];
+
+    const [selectedValue, setSelectedValue] = useState<string>('');
+
+    const handleChange1 = (value: string) => {
+        setSelectedValue(value);
     };
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: 100, gap: 20 }}>
             <>
                 <button onClick={() => setFirstModalOpen(true)}>Open First Modal</button>
-
+                <Autocomplete
+                    onChange={handleChange1}
+                    value={selectedValue}
+                    options={options}
+                    renderOptions={(options: string[], onItemClick: (value: string) => void) => {
+                        return (
+                            <ul>
+                                {options.map((option) => (
+                                    <li key={option} onClick={() => onItemClick(option)}>
+                                        {option}
+                                    </li>
+                                ))}
+                            </ul>
+                        );
+                    }}
+                />
                 <button onClick={() => setFirstDrawerOpen(true)}>Open First Drawer</button>
-                <Autocomplete asyncGetData={fetchData} />
 
                 <Modal isOpen={firstModalOpen} onClose={() => setFirstModalOpen(false)}>
                     <p>Content of the First Modal</p>
