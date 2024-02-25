@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom';
 import './styles.css';
 import { Transition } from '@headlessui/react';
 import { useLatest } from '../../hooks/useLatest.ts';
-import { LayerManager } from '../../utils/LayerManager.ts';
-import { useOutsideClick } from '../../hooks/useOutsideClick.tsx';
+import { layerManager } from '../../utils/LayerManager.ts';
 
 interface DrawerProps {
     children: ReactNode;
@@ -13,8 +12,6 @@ interface DrawerProps {
     position?: 'left' | 'right' | 'top' | 'bottom';
 }
 
-const layerManager = new LayerManager();
-
 export const Drawer = memo((props: DrawerProps) => {
     const { children, onClose, isOpen, position = 'right' } = props;
 
@@ -22,15 +19,12 @@ export const Drawer = memo((props: DrawerProps) => {
 
     const DrawerRef = useRef<HTMLDivElement | null>(null);
 
-    useOutsideClick(DrawerRef, () => {
-        latestOnClose.current();
-    });
-
     useEffect(() => {
-        if (isOpen) {
-            layerManager.addLayer(latestOnClose.current);
+        if (!isOpen) {
+            return;
         }
-    }, [isOpen]);
+        return layerManager.addLayer(latestOnClose.current);
+    }, [isOpen, latestOnClose]);
 
     return createPortal(
         <div>
@@ -45,9 +39,10 @@ export const Drawer = memo((props: DrawerProps) => {
                 as={Fragment}
             >
                 <div className={`drawer ${position}`}>
+                    <div className="drawer-overlay" onClick={onClose} />
                     <div className="drawer-content" ref={DrawerRef}>
                         {children}
-                        <button onClick={latestOnClose.current} className="close-button">
+                        <button onClick={onClose} className="close-button">
                             Close
                         </button>
                     </div>
